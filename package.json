@@ -16,7 +16,7 @@
   },
   "scripts": {
     "buildLinux": "./build.sh",
-    "buildWindows": "./build.bat",
+    "buildWindows": ".\\build.bat",
     "start": "node build/main.js"
   }
 }
