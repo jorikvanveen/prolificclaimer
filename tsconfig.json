@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "build",
+        "sourceMap": true,
+        "sourceRoot": "src",
+        "noImplicitAny": true,
+        "lib": ["DOM", "ESNext"],
+        "target": "ES5",
+        "esModuleInterop": true
+    },
+
+    "include": ["src/**/*"],
+}
