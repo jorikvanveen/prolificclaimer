@@ -91,7 +91,7 @@ async function getProlificId(username:string, password:string): Promise<string> 
 }   
 
 function getToken(username: string, password: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
         const browser = await puppeteer.launch({
             headless: false
         })

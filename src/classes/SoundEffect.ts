@@ -10,7 +10,16 @@ export default class SoundEffect {
     }
 
     public play() {
-        exec(`cvlc --play-and-exit --gain 3 ${this.path}`, error => {
+        let command: string;
+
+        if (process.platform === "win32") {
+            const vlcPath = path.join(__dirname, "..", "bin", "windows", "vlc.exe")
+            command = `${vlcPath} --play-and-exit -I dummy --dummy-quiet --no-video-deco ${this.path}`
+        } else {
+            command = `cvlc --play-and-exit --gain 3 ${this.path}`
+        }
+
+        exec(command, error => {
             if (error) {
                 console.error(error)
                 return
