@@ -18,5 +18,11 @@
     "buildLinux": "./build.sh",
     "buildWindows": ".\\build.bat",
     "start": "node build/main.js"
-  }
+  },
+  "pkg": {
+    "scripts": ["build/main.js", "build/classes/**/*.js"],
+    "assets": "build/assets/**/*",
+    "out-path": "build"
+  },
+  "bin": "build/main.js"
 }

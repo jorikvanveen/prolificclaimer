@@ -1,8 +1,19 @@
+import path from 'path'
+
 import fetch from 'node-fetch'
 import puppeteer from 'puppeteer'
 
 import CommandLine from './classes/CommandLine'
 import SoundEffect from './classes/SoundEffect'
+
+declare namespace NodeJS {
+    export interface Process {
+        pkg: boolean;
+        [key: string]: any;
+    }
+}
+
+declare const process: NodeJS.Process
 
 interface StudiesResponse {
     results: {
@@ -14,6 +25,18 @@ interface StudiesResponse {
 
 const notifySound = new SoundEffect('./notify.mp3')
 notifySound.play()
+
+let chromiumExecutable: string = path.join(__dirname, "assets", "bin", "linux", "chromium", "chrome");
+
+if (process.pkg) {
+    const buildDir = path.join(process.argv[0], "..")
+
+    if (process.platform === "win32") {
+        chromiumExecutable = path.join(buildDir, "assets", "bin", "windows", "chromium", "chrome.exe")
+    } else {
+        chromiumExecutable = path.join(buildDir, "assets", "bin", "linux", "chromium", "chrome")
+    }
+}
 
 function returnTimeout(timeout:number): Promise<void> {
     return new Promise((resolve) => {
@@ -55,14 +78,14 @@ function logIn(loginPage: puppeteer.Page, username: string, password: string): P
                 reject(new Error("INPUT FIELDS NOT FOUND"))
             }
         }), username, password)
-        // await loginPage.waitForNavigation()
         resolve()
     })
 }
 
 async function getProlificId(username:string, password:string): Promise<string> {
     const browser = await puppeteer.launch({
-        headless: false
+        headless: false,
+        executablePath: chromiumExecutable
     })
     
     const loginPage = await browser.newPage()
@@ -93,7 +116,8 @@ async function getProlificId(username:string, password:string): Promise<string> 
 function getToken(username: string, password: string): Promise<string> {
     return new Promise(async (resolve) => {
         const browser = await puppeteer.launch({
-            headless: false
+            headless: false,
+            executablePath: chromiumExecutable
         })
         const loginPage = await browser.newPage()
 
@@ -155,8 +179,6 @@ async function main() {
             foundStudies.push(study.id)
         }
     }, 5000)
-
-    // console.log(await fetchStudies())
 }
 
 main()
