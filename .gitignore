@@ -3,3 +3,4 @@ build
 *.log
 src/assets/
 assets
+dist

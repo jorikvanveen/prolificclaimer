@@ -24,7 +24,7 @@ export default class SoundEffect {
         console.log(process.cwd())
 
         
-        this.path = path.join(buildRoot, "assets", "sounds", fileName)
+        this.path = path.join(buildRoot, fileName)
     }
 
     public play() {
@@ -34,7 +34,7 @@ export default class SoundEffect {
             const vlcPath = path.join(buildRoot, "assets", "bin", "windows", "vlc.exe")
             command = `${vlcPath} --play-and-exit -I dummy --dummy-quiet --no-video-deco ${this.path}`
         } else {
-            const vlcPath = path.join(buildRoot, "assets", "bin", "linux", "cvlc", "vlc")
+            const vlcPath = "vlc"
             command = `${vlcPath} -I dummy --play-and-exit --gain 1 ${this.path}`
         }
 

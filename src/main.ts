@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs/promises'
 
 import fetch from 'node-fetch'
 import puppeteer from 'puppeteer'
@@ -26,16 +27,25 @@ interface StudiesResponse {
 const notifySound = new SoundEffect('./notify.mp3')
 notifySound.play()
 
-let chromiumExecutable: string = path.join(__dirname, "assets", "bin", "linux", "chromium", "chrome");
+let buildDir = __dirname;
 
 if (process.pkg) {
-    const buildDir = path.join(process.argv[0], "..")
+    buildDir = path.join(process.argv[0], "..")
+}
 
-    if (process.platform === "win32") {
-        chromiumExecutable = path.join(buildDir, "assets", "bin", "windows", "chromium", "chrome.exe")
-    } else {
-        chromiumExecutable = path.join(buildDir, "assets", "bin", "linux", "chromium", "chrome")
-    }
+function getChromiumExecutable(): Promise<string | undefined> {
+    return new Promise(async (resolve, reject) => {
+        if (process.pkg) {
+            // Use bundled chromium with puppeteer
+            if (process.platform === "linux") {
+                resolve(path.join(buildDir, "chrome-linux", "chrome"))
+            } else {
+                resolve(path.join(buildDir, "chrome-win", "chrome.exe"))
+            }
+        } else {
+            resolve(undefined)
+        }
+    })
 }
 
 function returnTimeout(timeout:number): Promise<void> {
@@ -78,6 +88,7 @@ function logIn(loginPage: puppeteer.Page, username: string, password: string): P
                 reject(new Error("INPUT FIELDS NOT FOUND"))
             }
         }), username, password)
+        console.log('done')
         resolve()
     })
 }
@@ -85,7 +96,7 @@ function logIn(loginPage: puppeteer.Page, username: string, password: string): P
 async function getProlificId(username:string, password:string): Promise<string> {
     const browser = await puppeteer.launch({
         headless: false,
-        executablePath: chromiumExecutable
+        executablePath: await getChromiumExecutable()
     })
     
     const loginPage = await browser.newPage()
@@ -117,7 +128,7 @@ function getToken(username: string, password: string): Promise<string> {
     return new Promise(async (resolve) => {
         const browser = await puppeteer.launch({
             headless: false,
-            executablePath: chromiumExecutable
+            executablePath: await getChromiumExecutable()
         })
         const loginPage = await browser.newPage()
 
