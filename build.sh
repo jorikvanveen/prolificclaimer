@@ -1,3 +1,6 @@
+rm -r build
+rm -r dist
+
 npm i -g yarn
 npm i -g typescript
 yarn

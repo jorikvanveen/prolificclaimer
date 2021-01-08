@@ -2,10 +2,14 @@ import path from 'path'
 import fs from 'fs/promises'
 
 import fetch from 'node-fetch'
-import puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer-extra'
+import open from 'open'
 
 import CommandLine from './classes/CommandLine'
 import SoundEffect from './classes/SoundEffect'
+
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+puppeteer.use(StealthPlugin())
 
 declare namespace NodeJS {
     export interface Process {
@@ -64,7 +68,7 @@ async function fetchStudies(token: string) {
     return response
 }
 
-function logIn(loginPage: puppeteer.Page, username: string, password: string): Promise<void> {
+function logIn(loginPage: any, username: string, password: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
         await loginPage.goto("https://www.prolific.co/auth/accounts/login/", { waitUntil: 'networkidle2' })
         await loginPage.evaluate(((username: string, password: string) => {
@@ -95,8 +99,8 @@ function logIn(loginPage: puppeteer.Page, username: string, password: string): P
 
 async function getProlificId(username:string, password:string): Promise<string> {
     const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: await getChromiumExecutable()
+        executablePath: await getChromiumExecutable(),
+        headless: false
     })
     
     const loginPage = await browser.newPage()
@@ -127,8 +131,8 @@ async function getProlificId(username:string, password:string): Promise<string> 
 function getToken(username: string, password: string): Promise<string> {
     return new Promise(async (resolve) => {
         const browser = await puppeteer.launch({
-            headless: false,
-            executablePath: await getChromiumExecutable()
+            executablePath: await getChromiumExecutable(),
+            headless: false
         })
         const loginPage = await browser.newPage()
 
@@ -172,11 +176,15 @@ async function main() {
             if (foundStudies.includes(study.id)) continue
             console.log("Study epicly yes", study)
             notifySound.play()
+            
+            console.log("Opening in browser")
+            open("https://app.prolific.co/studies/" + study.id)
 
             const claimResponse = await fetch("https://www.prolific.co/api/v1/submissions/", {
                 method: "POST",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify({
                     study_id: study.id,
